@@ -2,6 +2,7 @@ const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 const crypto = require('crypto');
 const { sendVerificationEmail } = require('../utils/emailService');
+const config = require('../config/config');
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
@@ -13,7 +14,30 @@ const registerUser = async (req, res) => {
     const userExists = await User.findOne({ email });
 
     if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
+      if (userExists.isVerified) {
+        return res.status(400).json({ message: 'User already exists' });
+      } else {
+        // User exists but is unverified - update their details and send a new token
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        userExists.name = name || userExists.name;
+        if (password) {
+          userExists.password = password; // mongoose schema pre-save hook will hash this
+        }
+        if (role === 'Artist' || role === 'Admin' || role === 'User') {
+          userExists.role = role;
+        }
+        userExists.verificationToken = verificationToken;
+        await userExists.save();
+
+        // Send new verification email asynchronously
+        sendVerificationEmail(userExists.email, userExists.name, verificationToken)
+          .catch(err => console.error('Email verification dispatch failed:', err));
+
+        return res.status(201).json({
+          message: 'Registration updated! A fresh verification email has been sent to your inbox.',
+          email: userExists.email
+        });
+      }
     }
 
     // Determine role - default to User if not specified or invalid
@@ -31,15 +55,13 @@ const registerUser = async (req, res) => {
       password,
       role: userRole,
       verificationToken,
-      isVerified: false, // Explicitly set starting state
+      isVerified: false,
     });
 
     if (user) {
-      // Get frontend URL dynamically from request headers or fallback
-      const frontendUrl = req.headers.origin || req.get('origin') || process.env.FRONTEND_URL || 'http://localhost:5173';
-
       // Send real email asynchronously
-      sendVerificationEmail(user.email, user.name, verificationToken, frontendUrl).catch(err => console.error('Email verification dispatch failed:', err));
+      sendVerificationEmail(user.email, user.name, verificationToken)
+        .catch(err => console.error('Email verification dispatch failed:', err));
 
       res.status(201).json({
         message: 'Registration successful! Please check your email to verify your account.',
@@ -151,9 +173,56 @@ const getUserProfile = async (req, res) => {
   }
 };
 
+// @desc    Resend verification email
+// @route   POST /api/auth/resend-verification
+// @access  Public
+const resendVerification = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    if (user.isVerified) {
+      return res.status(400).json({ message: 'This account is already verified. Please log in.' });
+    }
+
+    // Generate new token and save
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    user.verificationToken = verificationToken;
+    await user.save();
+
+    await sendVerificationEmail(user.email, user.name, verificationToken);
+
+    res.json({ message: 'Verification email resent successfully! Please check your inbox.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error while resending verification email' });
+  }
+};
+
+// @desc    Health check & environment validation
+// @route   GET /api/auth/health
+// @access  Public
+const healthCheck = async (req, res) => {
+  res.json({
+    status: 'ok',
+    environment: {
+      EMAIL_USER_set: !!process.env.EMAIL_USER,
+      EMAIL_PASS_set: !!process.env.EMAIL_PASS,
+      FRONTEND_URL_set: !!process.env.FRONTEND_URL,
+      JWT_SECRET_set: !!process.env.JWT_SECRET,
+      MONGO_URI_set: !!process.env.MONGO_URI,
+      FRONTEND_URL: process.env.FRONTEND_URL || 'not_set_falling_back_to_config'
+    }
+  });
+};
+
 module.exports = {
   registerUser,
   verifyEmail,
   loginUser,
   getUserProfile,
+  resendVerification,
+  healthCheck,
 };

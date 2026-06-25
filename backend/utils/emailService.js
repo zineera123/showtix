@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const config = require('../config/config');
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -25,8 +26,8 @@ const sendEmail = async (options) => {
 };
 
 // Specialized Templates
-const sendVerificationEmail = async (email, name, token, frontendUrl) => {
-  const baseUrl = (frontendUrl || process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
+const sendVerificationEmail = async (email, name, token) => {
+  const baseUrl = config.frontendUrl.replace(/\/$/, '');
   const verifyUrl = `${baseUrl}/verify-email?token=${token}`;
   
   const html = `
