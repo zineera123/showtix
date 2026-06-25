@@ -1,5 +1,11 @@
 const nodemailer = require('nodemailer');
 const config = require('../config/config');
+const dns = require('dns');
+
+// Force IPv4 resolution first to bypass Render IPv6 routing issues
+if (dns && typeof dns.setDefaultResultOrder === 'function') {
+  dns.setDefaultResultOrder('ipv4first');
+}
 
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
