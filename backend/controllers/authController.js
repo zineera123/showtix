@@ -35,8 +35,11 @@ const registerUser = async (req, res) => {
     });
 
     if (user) {
+      // Get frontend URL dynamically from request headers or fallback
+      const frontendUrl = req.headers.origin || req.get('origin') || process.env.FRONTEND_URL || 'http://localhost:5173';
+
       // Send real email asynchronously
-      sendVerificationEmail(user.email, user.name, verificationToken).catch(err => console.error('Email verification dispatch failed:', err));
+      sendVerificationEmail(user.email, user.name, verificationToken, frontendUrl).catch(err => console.error('Email verification dispatch failed:', err));
 
       res.status(201).json({
         message: 'Registration successful! Please check your email to verify your account.',

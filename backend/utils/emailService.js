@@ -25,8 +25,9 @@ const sendEmail = async (options) => {
 };
 
 // Specialized Templates
-const sendVerificationEmail = async (email, name, token) => {
-  const verifyUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
+const sendVerificationEmail = async (email, name, token, frontendUrl) => {
+  const baseUrl = (frontendUrl || process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
+  const verifyUrl = `${baseUrl}/verify-email?token=${token}`;
   
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
