@@ -35,8 +35,8 @@ const registerUser = async (req, res) => {
     });
 
     if (user) {
-      // Send real email
-      await sendVerificationEmail(user.email, user.name, verificationToken);
+      // Send real email asynchronously
+      sendVerificationEmail(user.email, user.name, verificationToken).catch(err => console.error('Email verification dispatch failed:', err));
 
       res.status(201).json({
         message: 'Registration successful! Please check your email to verify your account.',

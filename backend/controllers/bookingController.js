@@ -114,8 +114,8 @@ const verifyPaymentAndCreateBooking = async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
-    // Send Real Email
-    await sendBookingEmail(req.user.email, req.user.name, createdBooking, event);
+    // Send Real Email asynchronously
+    sendBookingEmail(req.user.email, req.user.name, createdBooking, event).catch(err => console.error('Booking confirmation email dispatch failed:', err));
 
     res.status(201).json({
       message: 'Booking confirmed',
