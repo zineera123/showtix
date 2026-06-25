@@ -56,7 +56,8 @@ const sendVerificationEmail = async (email, name, token) => {
     </div>
   `;
 
-  await sendEmail({ to: email, subject: 'Verify Your ShowTix Account', html });
+  const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  await sendEmail({ to: email, subject: `Verify Your ShowTix Account - ${timestamp}`, html });
 };
 
 const sendBookingEmail = async (email, name, booking, event) => {
