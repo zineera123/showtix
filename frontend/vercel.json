@@ -3,6 +3,10 @@
     {
       "source": "/api/:path*",
       "destination": "https://showtix-backend-zineera.onrender.com/api/:path*"
+    },
+    {
+      "source": "/((?!api|assets).*)",
+      "destination": "/index.html"
     }
   ]
 }
