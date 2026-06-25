@@ -2,10 +2,10 @@ const nodemailer = require('nodemailer');
 const config = require('../config/config');
 const dns = require('dns');
 
-// Force IPv4 resolution first to bypass Render IPv6 routing issues
-if (dns && typeof dns.setDefaultResultOrder === 'function') {
-  dns.setDefaultResultOrder('ipv4first');
-}
+// Custom lookup function to force IPv4 (family 4) resolution for Render environment
+const customLookup = (hostname, options, callback) => {
+  return dns.lookup(hostname, { ...options, family: 4 }, callback);
+};
 
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
@@ -17,6 +17,7 @@ const transporter = nodemailer.createTransport({
   },
   connectionTimeout: 10000, // 10 seconds
   socketTimeout: 10000,     // 10 seconds
+  lookup: customLookup,     // force IPv4 resolution
   tls: {
     rejectUnauthorized: false
   }
