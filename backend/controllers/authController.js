@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 const crypto = require('crypto');
-const { sendVerificationEmail } = require('../utils/emailService');
+const { sendVerificationEmail, getLastError } = require('../utils/emailService');
 const config = require('../config/config');
 
 // @desc    Register a new user
@@ -214,7 +214,8 @@ const healthCheck = async (req, res) => {
       JWT_SECRET_set: !!process.env.JWT_SECRET,
       MONGO_URI_set: !!process.env.MONGO_URI,
       FRONTEND_URL: process.env.FRONTEND_URL || 'not_set_falling_back_to_config'
-    }
+    },
+    lastEmailError: getLastError()
   });
 };
 

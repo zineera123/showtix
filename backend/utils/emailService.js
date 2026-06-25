@@ -9,6 +9,10 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+let lastEmailError = null;
+
+const getLastError = () => lastEmailError;
+
 const sendEmail = async (options) => {
   const mailOptions = {
     from: `"ShowTix" <${process.env.EMAIL_USER}>`,
@@ -22,6 +26,13 @@ const sendEmail = async (options) => {
     console.log(`Email sent to: ${options.to}`);
   } catch (error) {
     console.error('Email send failed:', error);
+    lastEmailError = {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      timestamp: new Date().toISOString()
+    };
+    throw error;
   }
 };
 
@@ -75,5 +86,6 @@ const sendBookingEmail = async (email, name, booking, event) => {
 module.exports = {
   sendEmail,
   sendVerificationEmail,
-  sendBookingEmail
+  sendBookingEmail,
+  getLastError,
 };
