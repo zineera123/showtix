@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 const crypto = require('crypto');
-const { sendVerificationEmail, getLastError } = require('../utils/emailService');
+const { sendVerificationEmail, getLastError, verifySMTP } = require('../utils/emailService');
 const config = require('../config/config');
 
 // @desc    Register a new user
@@ -205,6 +205,7 @@ const resendVerification = async (req, res) => {
 // @route   GET /api/auth/health
 // @access  Public
 const healthCheck = async (req, res) => {
+  const smtpStatus = await verifySMTP();
   res.json({
     status: 'ok',
     environment: {
@@ -215,6 +216,7 @@ const healthCheck = async (req, res) => {
       MONGO_URI_set: !!process.env.MONGO_URI,
       FRONTEND_URL: process.env.FRONTEND_URL || 'not_set_falling_back_to_config'
     },
+    smtpVerification: smtpStatus,
     lastEmailError: getLastError()
   });
 };

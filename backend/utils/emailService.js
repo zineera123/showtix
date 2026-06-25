@@ -9,10 +9,24 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  connectionTimeout: 10000, // 10 seconds
+  socketTimeout: 10000,     // 10 seconds
   tls: {
     rejectUnauthorized: false
   }
 });
+
+const verifySMTP = () => {
+  return new Promise((resolve) => {
+    transporter.verify((error, success) => {
+      if (error) {
+        resolve({ success: false, error: error.message });
+      } else {
+        resolve({ success: true });
+      }
+    });
+  });
+};
 
 let lastEmailError = null;
 
@@ -94,4 +108,5 @@ module.exports = {
   sendVerificationEmail,
   sendBookingEmail,
   getLastError,
+  verifySMTP,
 };
