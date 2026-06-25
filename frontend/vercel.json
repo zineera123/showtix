@@ -5,7 +5,7 @@
       "destination": "https://showtix-backend-zineera.onrender.com/api/:path*"
     },
     {
-      "source": "/((?!api|assets).*)",
+      "source": "/:path*",
       "destination": "/index.html"
     }
   ]
