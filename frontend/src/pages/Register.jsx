@@ -49,24 +49,63 @@ const Register = () => {
   if (isSuccess) {
     return (
       <div className="flex justify-center items-center min-h-[80vh]">
-        <div className="w-full max-w-md bg-white p-12 rounded-[40px] shadow-2xl border border-gray-100 text-center animate-in zoom-in duration-500">
-          <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto mb-8">
-            <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
-            </svg>
+        <div className="w-full max-w-md bg-white p-12 rounded-[40px] shadow-2xl border border-gray-100 text-center animate-in zoom-in duration-500 relative overflow-hidden">
+          {/* Subtle background accent */}
+          <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full -mr-12 -mt-12"></div>
+          
+          <div className="relative z-10">
+            <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto mb-8">
+              <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <h2 className="text-3xl font-black text-gray-900 tracking-tighter mb-4">VERIFY YOUR IDENTITY</h2>
+            <p className="text-gray-500 font-medium mb-10 leading-relaxed">
+              We've sent a high-security activation link to <span className="text-primary font-bold">{formData.email}</span>. 
+              Please check your inbox to activate your account.
+            </p>
+            <Link to="/login" className="block w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-emerald-600 transition-all shadow-xl shadow-slate-100">
+              Return to Login
+            </Link>
           </div>
-          <h2 className="text-3xl font-black text-gray-900 tracking-tighter mb-4">VERIFY YOUR IDENTITY</h2>
-          <p className="text-gray-500 font-medium mb-10 leading-relaxed">
-            We've sent a high-security activation link to <span className="text-primary font-bold">{formData.email}</span>. 
-            Please check your inbox to activate your account.
-          </p>
-          <Link to="/login" className="block w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-primary transition-all">
-            Return to Login
-          </Link>
         </div>
       </div>
     );
   }
+
+  const activeRole = formData.role || 'User';
+
+  const getRoleColors = (r) => {
+    switch (r) {
+      case 'Admin':
+        return {
+          bgAccent: 'bg-emerald-500/10',
+          borderFocus: 'focus:ring-emerald-500/25 focus:border-emerald-500',
+          buttonBg: 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-100 hover:shadow-emerald-200',
+          textLink: 'text-emerald-600',
+          headingColor: 'text-emerald-600',
+        };
+      case 'Artist':
+        return {
+          bgAccent: 'bg-blue-500/10',
+          borderFocus: 'focus:ring-blue-500/25 focus:border-blue-500',
+          buttonBg: 'bg-blue-600 hover:bg-blue-700 shadow-blue-100 hover:shadow-blue-200',
+          textLink: 'text-blue-600',
+          headingColor: 'text-blue-600',
+        };
+      case 'User':
+      default:
+        return {
+          bgAccent: 'bg-primary/10',
+          borderFocus: 'focus:ring-primary/25 focus:border-primary',
+          buttonBg: 'bg-primary hover:bg-rose-600 shadow-rose-100 hover:shadow-rose-200',
+          textLink: 'text-primary',
+          headingColor: 'text-primary',
+        };
+    }
+  };
+
+  const colors = getRoleColors(activeRole);
 
   const getHeading = () => {
     if (formData.role === 'Admin') return 'Admin Registration';
@@ -75,97 +114,102 @@ const Register = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-[80vh]">
-      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">{getHeading()}</h2>
+    <div className="flex justify-center items-center min-h-[80vh] animate-in fade-in duration-500">
+      <div className="w-full max-w-md bg-white p-10 rounded-[32px] shadow-2xl border border-gray-100 relative overflow-hidden">
+        {/* Subtle background accent */}
+        <div className={`absolute top-0 right-0 w-24 h-24 ${colors.bgAccent} rounded-full -mr-12 -mt-12`}></div>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
-              placeholder="John Doe"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
-              placeholder="you@email.com"
-              required
-            />
-          </div>
+        <div className="relative z-10">
+          <h2 className={`text-3xl font-black text-center ${colors.headingColor} mb-8 tracking-tighter uppercase`}>{getHeading()}</h2>
           
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
-              placeholder="••••••••"
-              required
-            />
-          </div>
-
-          {!urlRole && (
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">I am a...</label>
-              <div className="flex space-x-4">
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, role: 'User' })}
-                  className={`flex-1 py-3 border rounded-lg transition-all ${
-                    formData.role === 'User' 
-                    ? 'border-primary bg-primary/10 text-primary font-semibold' 
-                    : 'border-gray-300 text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  Ticket Buyer
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, role: 'Artist' })}
-                  className={`flex-1 py-3 border rounded-lg transition-all ${
-                    formData.role === 'Artist' 
-                    ? 'border-primary bg-primary/10 text-primary font-semibold' 
-                    : 'border-gray-300 text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  Creator/Artist
-                </button>
-              </div>
+              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Full Name</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                className={`w-full px-5 py-4 rounded-xl border border-gray-200 focus:ring-4 ${colors.borderFocus} transition-all outline-none font-medium`}
+                placeholder="John Doe"
+                required
+              />
             </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={loadingLocal}
-            className={`w-full py-4 rounded-xl text-white font-black uppercase tracking-widest flex justify-center items-center transition-all ${
-              loadingLocal ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:bg-rose-600 shadow-xl shadow-rose-200'
-            }`}
-          >
-            {loadingLocal ? 'Creating account...' : `Sign Up as ${formData.role}`}
-          </button>
-        </form>
+            <div>
+              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className={`w-full px-5 py-4 rounded-xl border border-gray-200 focus:ring-4 ${colors.borderFocus} transition-all outline-none font-medium`}
+                placeholder="you@email.com"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Password</label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className={`w-full px-5 py-4 rounded-xl border border-gray-200 focus:ring-4 ${colors.borderFocus} transition-all outline-none font-medium`}
+                placeholder="••••••••"
+                required
+              />
+            </div>
 
-        <p className="mt-8 text-center text-gray-500 font-medium">
-          Already verified?{' '}
-          <Link to={`/login?role=${formData.role}`} className="text-primary font-black hover:underline underline-offset-4 decoration-2">
-            Log in to {formData.role} Portal
-          </Link>
-        </p>
+            {!urlRole && (
+              <div>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">I am a...</label>
+                <div className="flex space-x-4">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, role: 'User' })}
+                    className={`flex-1 py-3 border.2 rounded-xl transition-all font-bold text-xs uppercase tracking-wider ${
+                      formData.role === 'User' 
+                      ? 'border-primary bg-primary/10 text-primary' 
+                      : 'border-gray-200 text-gray-400 hover:bg-gray-50'
+                    }`}
+                  >
+                    Ticket Buyer
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, role: 'Artist' })}
+                    className={`flex-1 py-3 border.2 rounded-xl transition-all font-bold text-xs uppercase tracking-wider ${
+                      formData.role === 'Artist' 
+                      ? 'border-blue-600 bg-blue-50 text-blue-600' 
+                      : 'border-gray-200 text-gray-400 hover:bg-gray-50'
+                    }`}
+                  >
+                    Creator/Artist
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loadingLocal}
+              className={`w-full py-4 rounded-xl text-white font-black uppercase tracking-widest flex justify-center items-center transition-all ${
+                loadingLocal ? 'bg-gray-400 cursor-not-allowed' : `${colors.buttonBg} shadow-xl`
+              }`}
+            >
+              {loadingLocal ? 'Creating account...' : `Sign Up as ${formData.role}`}
+            </button>
+          </form>
+
+          <p className="mt-8 text-center text-gray-500 font-medium">
+            Already verified?{' '}
+            <Link to={`/login?role=${formData.role}`} className={`${colors.textLink} font-black hover:underline underline-offset-4 decoration-2`}>
+              Log in to {formData.role} Portal
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -30,6 +30,40 @@ const Login = () => {
     setLoadingLocal(false);
   };
 
+  const activeRole = role || 'User';
+
+  const getRoleColors = (r) => {
+    switch (r) {
+      case 'Admin':
+        return {
+          bgAccent: 'bg-emerald-500/10',
+          borderFocus: 'focus:ring-emerald-500/25 focus:border-emerald-500',
+          buttonBg: 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-100 hover:shadow-emerald-200',
+          textLink: 'text-emerald-600',
+          headingColor: 'text-emerald-600',
+        };
+      case 'Artist':
+        return {
+          bgAccent: 'bg-blue-500/10',
+          borderFocus: 'focus:ring-blue-500/25 focus:border-blue-500',
+          buttonBg: 'bg-blue-600 hover:bg-blue-700 shadow-blue-100 hover:shadow-blue-200',
+          textLink: 'text-blue-600',
+          headingColor: 'text-blue-600',
+        };
+      case 'User':
+      default:
+        return {
+          bgAccent: 'bg-primary/10',
+          borderFocus: 'focus:ring-primary/25 focus:border-primary',
+          buttonBg: 'bg-primary hover:bg-rose-600 shadow-rose-100 hover:shadow-rose-200',
+          textLink: 'text-primary',
+          headingColor: 'text-primary',
+        };
+    }
+  };
+
+  const colors = getRoleColors(activeRole);
+
   const getHeading = () => {
     if (role === 'Admin') return 'Admin Portal';
     if (role === 'Artist') return 'Artist Management';
@@ -41,10 +75,10 @@ const Login = () => {
     <div className="flex justify-center items-center min-h-[70vh] animate-in fade-in duration-500">
       <div className="w-full max-w-md bg-white p-10 rounded-[32px] shadow-2xl border border-gray-100 relative overflow-hidden">
         {/* Subtle background accent */}
-        <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full -mr-12 -mt-12"></div>
+        <div className={`absolute top-0 right-0 w-24 h-24 ${colors.bgAccent} rounded-full -mr-12 -mt-12`}></div>
         
         <div className="relative z-10">
-          <h2 className="text-3xl font-black text-center text-gray-900 mb-2 tracking-tighter uppercase">{getHeading()}</h2>
+          <h2 className={`text-3xl font-black text-center ${colors.headingColor} mb-2 tracking-tighter uppercase`}>{getHeading()}</h2>
           <p className="text-center text-gray-400 text-sm font-medium mb-10">Enter your credentials to access your secure dashboard.</p>
           
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -54,7 +88,7 @@ const Login = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-5 py-4 rounded-xl border border-gray-200 focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all outline-none font-medium"
+                className={`w-full px-5 py-4 rounded-xl border border-gray-200 focus:ring-4 ${colors.borderFocus} transition-all outline-none font-medium`}
                 placeholder="identity@example.com"
                 required
               />
@@ -66,7 +100,7 @@ const Login = () => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-5 py-4 rounded-xl border border-gray-200 focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all outline-none font-medium"
+                className={`w-full px-5 py-4 rounded-xl border border-gray-200 focus:ring-4 ${colors.borderFocus} transition-all outline-none font-medium`}
                 placeholder="••••••••"
                 required
               />
@@ -76,7 +110,7 @@ const Login = () => {
               type="submit"
               disabled={loadingLocal}
               className={`w-full py-4 rounded-xl text-white font-black uppercase tracking-[0.2em] text-xs flex justify-center items-center transition-all ${
-                loadingLocal ? 'bg-gray-400 cursor-not-allowed' : 'bg-slate-900 hover:bg-primary shadow-xl shadow-slate-200 hover:shadow-rose-200 hover:-translate-y-0.5'
+                loadingLocal ? 'bg-gray-400 cursor-not-allowed' : `${colors.buttonBg} shadow-xl hover:-translate-y-0.5`
               }`}
             >
               {loadingLocal ? 'Authenticating...' : 'Sign In Now'}
@@ -89,7 +123,7 @@ const Login = () => {
                 New to the {role} Portal?{' '}
                 <Link 
                   to={`/register?role=${role}`} 
-                  className="text-primary font-black hover:underline underline-offset-4 decoration-2"
+                  className={`${colors.textLink} font-black hover:underline underline-offset-4 decoration-2`}
                 >
                   Create {role} Account
                 </Link>
@@ -97,7 +131,7 @@ const Login = () => {
             ) : (
               <>
                 Don't have an account?{' '}
-                <Link to="/register" className="text-primary font-black hover:underline underline-offset-4 decoration-2">
+                <Link to="/register" className={`${colors.textLink} font-black hover:underline underline-offset-4 decoration-2`}>
                   Sign Up Here
                 </Link>
               </>
