@@ -109,6 +109,9 @@ const healthCheck = async (req, res) => {
       FRONTEND_URL_set: !!process.env.FRONTEND_URL,
       JWT_SECRET_set: !!process.env.JWT_SECRET,
       MONGO_URI_set: !!process.env.MONGO_URI,
+      RAZORPAY_KEY_ID_set: !!process.env.RAZORPAY_KEY_ID,
+      RAZORPAY_KEY_SECRET_set: !!process.env.RAZORPAY_KEY_SECRET,
+      RAZORPAY_KEY_PREFIX: process.env.RAZORPAY_KEY_ID ? process.env.RAZORPAY_KEY_ID.substring(0, 12) + '...' : 'NOT_SET',
       FRONTEND_URL: process.env.FRONTEND_URL || 'not_set_falling_back_to_config'
     },
     smtpVerification: smtpStatus,
