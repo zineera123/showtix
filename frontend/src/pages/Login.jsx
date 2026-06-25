@@ -67,7 +67,7 @@ const Login = () => {
   const getHeading = () => {
     if (role === 'Admin') return 'Admin Portal';
     if (role === 'Artist') return 'Artist Management';
-    if (role === 'User') return 'User Verification';
+    if (role === 'User') return 'User Login';
     return 'Secure Login';
   };
 

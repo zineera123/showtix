@@ -4,7 +4,6 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import VerifyEmail from './pages/VerifyEmail';
 import Dashboard from './pages/Dashboard';
 import EventDetails from './pages/EventDetails';
 import { AuthContext } from './context/AuthContext';
@@ -32,7 +31,6 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/events/:id" element={<EventDetails />} />
             
             <Route 

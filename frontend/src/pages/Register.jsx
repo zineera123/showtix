@@ -28,8 +28,6 @@ const Register = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const [isSuccess, setIsSuccess] = useState(false);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoadingLocal(true);
@@ -37,41 +35,14 @@ const Register = () => {
     const result = await register(formData.name, formData.email, formData.password, formData.role);
     
     if (result.success) {
-      toast.success(result.message, { duration: 6000 });
-      setIsSuccess(true);
+      toast.success(result.message || 'Registration successful! You can now log in.', { duration: 4000 });
+      navigate(`/login?role=${formData.role}`);
     } else {
       toast.error(result.message);
     }
     
     setLoadingLocal(false);
   };
-
-  if (isSuccess) {
-    return (
-      <div className="flex justify-center items-center min-h-[80vh]">
-        <div className="w-full max-w-md bg-white p-12 rounded-[40px] shadow-2xl border border-gray-100 text-center animate-in zoom-in duration-500 relative overflow-hidden">
-          {/* Subtle background accent */}
-          <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full -mr-12 -mt-12"></div>
-          
-          <div className="relative z-10">
-            <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto mb-8">
-              <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
-              </svg>
-            </div>
-            <h2 className="text-3xl font-black text-gray-900 tracking-tighter mb-4">VERIFY YOUR IDENTITY</h2>
-            <p className="text-gray-500 font-medium mb-10 leading-relaxed">
-              We've sent a high-security activation link to <span className="text-primary font-bold">{formData.email}</span>. 
-              Please check your inbox to activate your account.
-            </p>
-            <Link to="/login" className="block w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-emerald-600 transition-all shadow-xl shadow-slate-100">
-              Return to Login
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   const activeRole = formData.role || 'User';
 
@@ -204,7 +175,7 @@ const Register = () => {
           </form>
 
           <p className="mt-8 text-center text-gray-500 font-medium">
-            Already verified?{' '}
+            Already have an account?{' '}
             <Link to={`/login?role=${formData.role}`} className={`${colors.textLink} font-black hover:underline underline-offset-4 decoration-2`}>
               Log in to {formData.role} Portal
             </Link>
@@ -216,3 +187,4 @@ const Register = () => {
 };
 
 export default Register;
+

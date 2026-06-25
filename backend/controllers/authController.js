@@ -1,7 +1,6 @@
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
-const crypto = require('crypto');
-const { sendVerificationEmail, getLastError, verifySMTP } = require('../utils/emailService');
+const { getLastError, verifySMTP } = require('../utils/emailService');
 const config = require('../config/config');
 
 // @desc    Register a new user
@@ -14,30 +13,7 @@ const registerUser = async (req, res) => {
     const userExists = await User.findOne({ email });
 
     if (userExists) {
-      if (userExists.isVerified) {
-        return res.status(400).json({ message: 'User already exists' });
-      } else {
-        // User exists but is unverified - update their details and send a new token
-        const verificationToken = crypto.randomBytes(32).toString('hex');
-        userExists.name = name || userExists.name;
-        if (password) {
-          userExists.password = password; // mongoose schema pre-save hook will hash this
-        }
-        if (role === 'Artist' || role === 'Admin' || role === 'User') {
-          userExists.role = role;
-        }
-        userExists.verificationToken = verificationToken;
-        await userExists.save();
-
-        // Send new verification email asynchronously
-        sendVerificationEmail(userExists.email, userExists.name, verificationToken)
-          .catch(err => console.error('Email verification dispatch failed:', err));
-
-        return res.status(201).json({
-          message: 'Registration updated! A fresh verification email has been sent to your inbox.',
-          email: userExists.email
-        });
-      }
+      return res.status(400).json({ message: 'User already exists' });
     }
 
     // Determine role - default to User if not specified or invalid
@@ -46,25 +22,17 @@ const registerUser = async (req, res) => {
       userRole = role;
     }
 
-    // Generate Verification Token
-    const verificationToken = crypto.randomBytes(32).toString('hex');
-
     const user = await User.create({
       name,
       email,
       password,
       role: userRole,
-      verificationToken,
-      isVerified: false,
+      isVerified: true,
     });
 
     if (user) {
-      // Send real email asynchronously
-      sendVerificationEmail(user.email, user.name, verificationToken)
-        .catch(err => console.error('Email verification dispatch failed:', err));
-
       res.status(201).json({
-        message: 'Registration successful! Please check your email to verify your account.',
+        message: 'Registration successful! You can now log in.',
         email: user.email
       });
     } else {
@@ -73,43 +41,6 @@ const registerUser = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error during registration' });
-  }
-};
-
-// @desc    Verify email
-// @route   GET /api/auth/verify/:token
-// @access  Public
-const verifyEmail = async (req, res) => {
-  const { token } = req.params;
-  console.log('--- Email Verification Start (Atomic) ---');
-  console.log('Verification Token Received:', token);
-
-  try {
-    // Perform an atomic update: Find by token, set verified to true, and clear token
-    const user = await User.findOneAndUpdate(
-      { verificationToken: token },
-      { 
-        $set: { isVerified: true },
-        $unset: { verificationToken: 1 } 
-      },
-      { new: true } // Return the updated document
-    );
-
-    if (!user) {
-      console.log('Verification Failed: No user found with this token (or already verified)');
-      // Check if user is already verified (by searching for a user that HAS no token but was likely the one we want)
-      // Since we don't have email here, we can't be sure, but let's assume if findOne fails, it's either bad token or already done.
-      return res.status(400).json({ message: 'Invalid or expired verification token' });
-    }
-
-    console.log('User Verified Atomically:', user.email);
-    res.json({ message: 'Email verified successfully! You can now log in.' });
-
-  } catch (error) {
-    console.error('Verification Atomic Error:', error);
-    res.status(500).json({ message: 'An error occurred during verification' });
-  } finally {
-    console.log('--- Email Verification End ---');
   }
 };
 
@@ -123,14 +54,6 @@ const loginUser = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user && (await user.matchPassword(password))) {
-      // Check if verified
-      if (!user.isVerified) {
-        return res.status(403).json({ 
-          message: 'Please verify your email address before logging in.',
-          unverified: true 
-        });
-      }
-
       if (user.isBlocked) {
         return res.status(403).json({ message: 'Your account has been suspended. Please contact support.' });
       }
@@ -173,34 +96,6 @@ const getUserProfile = async (req, res) => {
   }
 };
 
-// @desc    Resend verification email
-// @route   POST /api/auth/resend-verification
-// @access  Public
-const resendVerification = async (req, res) => {
-  const { email } = req.body;
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    if (user.isVerified) {
-      return res.status(400).json({ message: 'This account is already verified. Please log in.' });
-    }
-
-    // Generate new token and save
-    const verificationToken = crypto.randomBytes(32).toString('hex');
-    user.verificationToken = verificationToken;
-    await user.save();
-
-    await sendVerificationEmail(user.email, user.name, verificationToken);
-
-    res.json({ message: 'Verification email resent successfully! Please check your inbox.' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error while resending verification email' });
-  }
-};
-
 // @desc    Health check & environment validation
 // @route   GET /api/auth/health
 // @access  Public
@@ -223,9 +118,7 @@ const healthCheck = async (req, res) => {
 
 module.exports = {
   registerUser,
-  verifyEmail,
   loginUser,
   getUserProfile,
-  resendVerification,
   healthCheck,
 };

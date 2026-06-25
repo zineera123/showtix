@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-const config = require('../config/config');
+
 const dns = require('dns');
 
 // Custom lookup function to force IPv4 (family 4) resolution for Render environment
@@ -62,29 +62,7 @@ const sendEmail = async (options) => {
   }
 };
 
-// Specialized Templates
-const sendVerificationEmail = async (email, name, token) => {
-  const baseUrl = config.frontendUrl.replace(/\/$/, '');
-  const verifyUrl = `${baseUrl}/verify-email?token=${token}`;
-  
-  const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-      <h2 style="color: #e11d48; text-align: center;">Welcome to ShowTix!</h2>
-      <p>Hello ${name},</p>
-      <p>Please verify your email address to activate your account and start booking live experiences.</p>
-      <div style="text-align: center; margin: 30px 0;">
-        <a href="${verifyUrl}" style="background-color: #e11d48; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Verify My Email</a>
-      </div>
-      <p>If the button doesn't work, copy and paste this link:</p>
-      <p style="color: #666; font-size: 12px;">${verifyUrl}</p>
-      <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
-      <p style="font-size: 10px; color: #aaa; text-align: center;">&copy; 2026 ShowTix Ecosystem. All rights reserved.</p>
-    </div>
-  `;
 
-  const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  await sendEmail({ to: email, subject: `Verify Your ShowTix Account - ${timestamp}`, html });
-};
 
 const sendBookingEmail = async (email, name, booking, event) => {
   const html = `
@@ -112,7 +90,6 @@ const sendBookingEmail = async (email, name, booking, event) => {
 
 module.exports = {
   sendEmail,
-  sendVerificationEmail,
   sendBookingEmail,
   getLastError,
   verifySMTP,
